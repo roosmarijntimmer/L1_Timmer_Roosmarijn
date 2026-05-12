@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skill Tree — Roosmarijn Timmer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --bg2: #141417;
+    --bg3: #1a1a1e;
+    --border: rgba(255,255,255,0.08);
+    --border-hover: rgba(255,255,255,0.16);
+    --text: #f0efe8;
+    --text2: rgba(240,239,232,0.55);
+    --text3: rgba(240,239,232,0.3);
+    --purple: #7F77DD;
+    --purple-dim: rgba(127,119,221,0.15);
+    --purple-border: rgba(127,119,221,0.35);
+    --teal: #1D9E75;
+    --teal-dim: rgba(29,158,117,0.15);
+    --teal-border: rgba(29,158,117,0.35);
+    --coral: #D85A30;
+    --coral-dim: rgba(216,90,48,0.15);
+    --coral-border: rgba(216,90,48,0.35);
+    --amber: #EF9F27;
+    --amber-dim: rgba(239,159,39,0.12);
+    --amber-border: rgba(239,159,39,0.3);
+    --blue: #378ADD;
+    --blue-dim: rgba(55,138,221,0.12);
+    --blue-border: rgba(55,138,221,0.3);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  header { margin-bottom: 3.5rem; }
+
+  .eyebrow {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 0.6rem;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+
+  h1 span { color: var(--purple); }
+
+  .intro {
+    font-size: 15px;
+    color: var(--text2);
+    max-width: 480px;
+    line-height: 1.7;
+  }
+
+  .xp-bar {
+    margin-top: 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .xp-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    white-space: nowrap;
+  }
+
+  .xp-track {
+    flex: 1;
+    height: 3px;
+    background: var(--bg3);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .xp-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--purple), var(--teal));
+    transition: width 1.2s cubic-bezier(.4,0,.2,1);
+  }
+
+  .xp-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text3);
+    white-space: nowrap;
+  }
+
+  .section { margin-bottom: 2.5rem; }
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 0.5px;
+    background: var(--border);
+  }
+
+  .section-tag {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .node-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.18s, transform 0.18s;
+    cursor: pointer;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .node-card:nth-child(1) { animation-delay: 0.05s; }
+  .node-card:nth-child(2) { animation-delay: 0.1s; }
+  .node-card:nth-child(3) { animation-delay: 0.15s; }
+  .node-card:nth-child(4) { animation-delay: 0.2s; }
+
+  .node-card:hover:not(.locked) {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+  }
+
+  .node-card.open {
+    grid-column: 1 / -1;
+    border-color: var(--border-hover);
+  }
+
+  .node-card.locked {
+    opacity: 0.38;
+    cursor: default;
+  }
+
+  .node-card.purple { border-color: var(--purple-border); background: linear-gradient(135deg, var(--bg2) 60%, var(--purple-dim)); }
+  .node-card.teal   { border-color: var(--teal-border);   background: linear-gradient(135deg, var(--bg2) 60%, var(--teal-dim)); }
+  .node-card.coral  { border-color: var(--coral-border);  background: linear-gradient(135deg, var(--bg2) 60%, var(--coral-dim)); }
+  .node-card.amber  { border-color: var(--amber-border);  background: linear-gradient(135deg, var(--bg2) 60%, var(--amber-dim)); }
+  .node-card.blue   { border-color: var(--blue-border);   background: linear-gradient(135deg, var(--bg2) 60%, var(--blue-dim)); }
+
+  .node-header {
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    position: relative;
+  }
+
+  .node-icon {
+    font-size: 20px;
+    color: var(--text3);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .purple .node-icon { color: var(--purple); }
+  .teal   .node-icon { color: var(--teal); }
+  .coral  .node-icon { color: var(--coral); }
+  .amber  .node-icon { color: var(--amber); }
+  .blue   .node-icon { color: var(--blue); }
+
+  .node-text { flex: 1; }
+
+  .node-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 3px;
+    letter-spacing: 0.01em;
+  }
+
+  .node-desc {
+    font-size: 11px;
+    color: var(--text2);
+    line-height: 1.4;
+  }
+
+  .badge {
+    font-family: 'Syne', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 99px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .badge.purple { background: var(--purple-dim); color: var(--purple); border: 0.5px solid var(--purple-border); }
+  .badge.teal   { background: var(--teal-dim);   color: var(--teal);   border: 0.5px solid var(--teal-border); }
+  .badge.coral  { background: var(--coral-dim);  color: var(--coral);  border: 0.5px solid var(--coral-border); }
+  .badge.amber  { background: var(--amber-dim);  color: var(--amber);  border: 0.5px solid var(--amber-border); }
+  .badge.gray   { background: rgba(255,255,255,0.04); color: var(--text3); border: 0.5px solid var(--border); }
+
+  .chevron {
+    font-size: 14px;
+    color: var(--text3);
+    transition: transform 0.22s;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .node-card.open .chevron { transform: rotate(180deg); }
+  .locked .chevron { display: none; }
+
+  .node-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(.4,0,.2,1);
+  }
+
+  .node-body.open { max-height: 1400px; }
+
+  .node-content {
+    padding: 14px 18px 18px;
+    border-top: 0.5px solid var(--border);
+  }
+
+  .content-text {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .media-slot {
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--bg3);
+    border: 0.5px dashed var(--border-hover);
+    margin-bottom: 12px;
+    min-height: 80px;
+  }
+
+  .media-slot img {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+    max-height: 320px;
+    border-radius: 10px;
+  }
+
+  .media-slot iframe {
+    width: 100%;
+    height: 240px;
+    display: block;
+    border: none;
+  }
+
+  .media-slot video {
+    width: 100%;
+    display: block;
+    max-height: 320px;
+    border-radius: 10px;
+    background: #000;
+  }
+
+  .media-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 28px 16px;
+    color: var(--text3);
+  }
+
+  .media-placeholder i { font-size: 24px; }
+
+  .media-placeholder span {
+    font-size: 11px;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .upload-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .upload-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 0.5px solid var(--border-hover);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.12s, color 0.12s;
+  }
+
+  .upload-btn:hover { background: var(--bg3); color: var(--text); }
+  .upload-btn i { font-size: 13px; }
+
+  .yt-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .yt-row input {
+    flex: 1;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 0.5px solid var(--border-hover);
+    background: var(--bg3);
+    color: var(--text);
+    outline: none;
+  }
+
+  .yt-row input:focus { border-color: var(--purple); }
+
+  .yt-row button {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 0.5px solid var(--purple-border);
+    background: var(--purple-dim);
+    color: var(--purple);
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+
+  .yt-row button:hover { background: rgba(127,119,221,0.25); }
+
+  .highlight-ring {
+    box-shadow: 0 0 0 1.5px var(--teal-border), 0 0 24px var(--teal-dim);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="page">
+
+  <header>
+    <div class="eyebrow">Roosmarijn Timmer &nbsp;·&nbsp; Cross Media &nbsp;·&nbsp; Halfjaar 3</div>
+    <h1>Skill <span>Tree</span></h1>
+    <p class="intro">Een overzicht van mijn ontwikkeling in vakgebied en werkhouding — klik op een node voor meer informatie, foto's of video's.</p>
+    <div class="xp-bar">
+      <span class="xp-label">Voortgang</span>
+      <div class="xp-track"><div class="xp-fill" id="xpfill"></div></div>
+      <span class="xp-num">75 / 100 XP</span>
+    </div>
+  </header>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-tag">Skills vakgebied</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="grid">
+
+      <div class="node-card purple" id="n-video" onclick="toggle('n-video')">
+        <div class="node-header">
+          <i class="ti ti-video node-icon" aria-hidden="true"></i>
+          <div class="node-text">
+            <div class="node-name">Videoproductie</div>
+            <div class="node-desc">Opname, regie & post-productie</div>
+          </div>
+          <span class="badge purple">Sterk</span>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="node-body" id="b-n-video">
+          <div class="node-content">
+            <p class="content-text">Pas halverwege het tweede jaar ben ik me gaan verdiepen in video — maar ik voelde me er meteen op mijn plek. Op school heb ik de ruimte gekregen om Premiere Pro te ontdekken en langzaam te beginnen met het editten van video's. Tijdens mijn stage heb ik die skills verder uitgebreid en geleerd om op een professionele en gestructureerde manier te werken.</p>
+            <div class="media-slot" id="ms-video">
+              <div class="media-placeholder"><i class="ti ti-photo" aria-hidden="true"></i><span>Voeg hier een foto, still of video toe</span></div>
+            </div>
+            <div class="upload-row">
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-video','image')"><i class="ti ti-photo" aria-hidden="true"></i> Foto</button>
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-video','video')"><i class="ti ti-video" aria-hidden="true"></i> MP4</button>
+              <button class="upload-btn" onclick="event.stopPropagation();showYT('ms-video')"><i class="ti ti-brand-youtube" aria-hidden="true"></i> YouTube / Vimeo</button>
+            </div>
+            <div class="yt-row" id="yt-ms-video" style="display:none">
+              <input type="text" placeholder="Plak YouTube of Vimeo URL" id="yt-inp-ms-video" onclick="event.stopPropagation()">
+              <button onclick="event.stopPropagation();embedYT('ms-video')">Laden</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node-card teal highlight-ring" id="n-foto" onclick="toggle('n-foto')">
+        <div class="node-header">
+          <i class="ti ti-camera node-icon" aria-hidden="true"></i>
+          <div class="node-text">
+            <div class="node-name">Fotografie</div>
+            <div class="node-desc">Compositie, belichting & editing</div>
+          </div>
+          <span class="badge teal">Ontwikkeld</span>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="node-body" id="b-n-foto">
+          <div class="node-content">
+            <p class="content-text">In het begin van de opleiding was ik voornamelijk bezig met fotografie. Ik was zelf al fotograaf op mijn middelbare school en heb op het GLU deze skill verder kunnen verbreden. Ik heb fotografie vooral ingezet voor posters en voor de magazines die ik heb gemaakt.</p>
+            <div class="media-slot" id="ms-foto">
+              <div class="media-placeholder"><i class="ti ti-photo" aria-hidden="true"></i><span>Voeg hier een foto toe</span></div>
+            </div>
+            <div class="upload-row">
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-foto','image')"><i class="ti ti-photo" aria-hidden="true"></i> Foto</button>
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-foto','video')"><i class="ti ti-video" aria-hidden="true"></i> MP4</button>
+              <button class="upload-btn" onclick="event.stopPropagation();showYT('ms-foto')"><i class="ti ti-brand-youtube" aria-hidden="true"></i> YouTube / Vimeo</button>
+            </div>
+            <div class="yt-row" id="yt-ms-foto" style="display:none">
+              <input type="text" placeholder="Plak YouTube of Vimeo URL" id="yt-inp-ms-foto" onclick="event.stopPropagation()">
+              <button onclick="event.stopPropagation();embedYT('ms-foto')">Laden</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node-card coral" id="n-edit" onclick="toggle('n-edit')">
+        <div class="node-header">
+          <i class="ti ti-cut node-icon" aria-hidden="true"></i>
+          <div class="node-text">
+            <div class="node-name">Montage & editing</div>
+            <div class="node-desc">Premiere Pro, DaVinci & Avid</div>
+          </div>
+          <span class="badge coral">Sterk</span>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="node-body" id="b-n-edit">
+          <div class="node-content">
+            <p class="content-text">Editing is op dezelfde manier opgekomen als filmen, maar tijdens mijn stage heb ik dit veel verder kunnen verbreden. Ik heb Premiere Pro nog beter leren kennen en daarnaast andere editing software als DaVinci Resolve en Avid ontdekt. Ik heb hier veel technische kennis en shortcuts uit geleerd.</p>
+            <div class="media-slot" id="ms-edit">
+              <div class="media-placeholder"><i class="ti ti-player-play" aria-hidden="true"></i><span>Voeg een fragment of screenshot toe</span></div>
+            </div>
+            <div class="upload-row">
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-edit','image')"><i class="ti ti-photo" aria-hidden="true"></i> Foto</button>
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-edit','video')"><i class="ti ti-video" aria-hidden="true"></i> MP4</button>
+              <button class="upload-btn" onclick="event.stopPropagation();showYT('ms-edit')"><i class="ti ti-brand-youtube" aria-hidden="true"></i> YouTube / Vimeo</button>
+            </div>
+            <div class="yt-row" id="yt-ms-edit" style="display:none">
+              <input type="text" placeholder="Plak YouTube of Vimeo URL" id="yt-inp-ms-edit" onclick="event.stopPropagation()">
+              <button onclick="event.stopPropagation();embedYT('ms-edit')">Laden</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node-card amber" id="n-concept" onclick="toggle('n-concept')">
+        <div class="node-header">
+          <i class="ti ti-bulb node-icon" aria-hidden="true"></i>
+          <div class="node-text">
+            <div class="node-name">Creatief concept</div>
+            <div class="node-desc">Van idee tot uitgewerkt eindproduct</div>
+          </div>
+          <span class="badge amber">Centraal</span>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="node-body" id="b-n-concept">
+          <div class="node-content">
+            <p class="content-text">Creatief concept staat erg centraal in mijn opleiding. Het creatieve proces van begin tot eind uitwerken en uitbreiden is iets wat door alles heen loopt — bij campagnes, maar ook bij video's. Door de jaren heen is het iets minder op de voorgrond gekomen, maar het vormt nog steeds de basis van hoe ik werk.</p>
+            <div class="media-slot" id="ms-concept">
+              <div class="media-placeholder"><i class="ti ti-photo" aria-hidden="true"></i><span>Moodboard, schets of conceptfoto</span></div>
+            </div>
+            <div class="upload-row">
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-concept','image')"><i class="ti ti-photo" aria-hidden="true"></i> Foto</button>
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-concept','video')"><i class="ti ti-video" aria-hidden="true"></i> MP4</button>
+              <button class="upload-btn" onclick="event.stopPropagation();showYT('ms-concept')"><i class="ti ti-brand-youtube" aria-hidden="true"></i> YouTube / Vimeo</button>
+            </div>
+            <div class="yt-row" id="yt-ms-concept" style="display:none">
+              <input type="text" placeholder="Plak YouTube of Vimeo URL" id="yt-inp-ms-concept" onclick="event.stopPropagation()">
+              <button onclick="event.stopPropagation();embedYT('ms-concept')">Laden</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-tag">Projecten</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="grid">
+
+      <div class="node-card purple" id="n-false" onclick="toggle('n-false')">
+        <div class="node-header">
+          <i class="ti ti-music node-icon" aria-hidden="true"></i>
+          <div class="node-text">
+            <div class="node-name">Videoclip "False Alarm"</div>
+            <div class="node-desc">Eerste video-opdracht op school</div>
+          </div>
+          <span class="badge purple">Project</span>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="node-body" id="b-n-false">
+          <div class="node-content">
+            <p class="content-text">De eerste video-opdracht voor school. We moesten een videoclip bedenken, uitwerken en realiseren. In een groepje hebben we een concept uitgedacht en dit in werking gezet — van planning en opnames tot het afzonderlijk editen van het eindresultaat.</p>
+            <div class="media-slot" id="ms-false">
+              <div class="media-placeholder"><i class="ti ti-player-play" aria-hidden="true"></i><span>Embed de videoclip of upload een MP4</span></div>
+            </div>
+            <div class="upload-row">
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-false','image')"><i class="ti ti-photo" aria-hidden="true"></i> Foto</button>
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-false','video')"><i class="ti ti-video" aria-hidden="true"></i> MP4</button>
+              <button class="upload-btn" onclick="event.stopPropagation();showYT('ms-false')"><i class="ti ti-brand-youtube" aria-hidden="true"></i> YouTube / Vimeo</button>
+            </div>
+            <div class="yt-row" id="yt-ms-false" style="display:none">
+              <input type="text" placeholder="Plak YouTube of Vimeo URL" id="yt-inp-ms-false" onclick="event.stopPropagation()">
+              <button onclick="event.stopPropagation();embedYT('ms-false')">Laden</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node-card teal" id="n-newbe" onclick="toggle('n-newbe')">
+        <div class="node-header">
+          <i class="ti ti-building node-icon" aria-hidden="true"></i>
+          <div class="node-text">
+            <div class="node-name">Stagevideo NewBe</div>
+            <div class="node-desc">8 maanden stage · Sony FX6 & FX9</div>
+          </div>
+          <span class="badge teal">Trots op</span>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="node-body" id="b-n-newbe">
+          <div class="node-content">
+            <p class="content-text">Voor mijn stage van 8 maanden bij NewBe heb ik een stagevideo gemaakt. Ik ben trots op deze video omdat ik er al mijn geleerde skills in heb kunnen laten zien. Wat deze video extra bijzonder maakt is dat hij — in tegenstelling tot mijn eerdere werk — is gefilmd met professionele camera's: de Sony FX6 en FX9. Dat gaf het filmen een heel andere ervaring en tilde het eindresultaat naar een nieuw niveau.</p>
+            <div class="media-slot" id="ms-newbe">
+              <div class="media-placeholder"><i class="ti ti-player-play" aria-hidden="true"></i><span>Upload de stagevideo of embed via YouTube / Vimeo</span></div>
+            </div>
+            <div class="upload-row">
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-newbe','image')"><i class="ti ti-photo" aria-hidden="true"></i> Foto</button>
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-newbe','video')"><i class="ti ti-video" aria-hidden="true"></i> MP4</button>
+              <button class="upload-btn" onclick="event.stopPropagation();showYT('ms-newbe')"><i class="ti ti-brand-youtube" aria-hidden="true"></i> YouTube / Vimeo</button>
+            </div>
+            <div class="yt-row" id="yt-ms-newbe" style="display:none">
+              <input type="text" placeholder="Plak YouTube of Vimeo URL" id="yt-inp-ms-newbe" onclick="event.stopPropagation()">
+              <button onclick="event.stopPropagation();embedYT('ms-newbe')">Laden</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-tag">Werkhouding</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="grid">
+
+      <div class="node-card teal" id="n-samen" onclick="toggle('n-samen')">
+        <div class="node-header">
+          <i class="ti ti-users node-icon" aria-hidden="true"></i>
+          <div class="node-text">
+            <div class="node-name">Samenwerking & communicatie</div>
+            <div class="node-desc">Afstemmen, verdelen & co-creëren</div>
+          </div>
+          <span class="badge teal">Kwaliteit</span>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="node-body" id="b-n-samen">
+          <div class="node-content">
+            <p class="content-text">Ik heb veel samengewerkt en heb hier over het algemeen geen moeite mee. Het is fijn om taken te verdelen en samen tot een concept te komen. Ik neem in een groep vaak een managementrol op, wat er soms ook voor zorgt dat ik verantwoordelijkheid draag als iemand minder bijdraagt. Ik voel mij verantwoordelijk voor het geheel, maar houd er ook van om dingen echt samen uit te werken en goed met elkaar te communiceren.</p>
+            <div class="media-slot" id="ms-samen">
+              <div class="media-placeholder"><i class="ti ti-photo" aria-hidden="true"></i><span>Behind the scenes of teamfoto</span></div>
+            </div>
+            <div class="upload-row">
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-samen','image')"><i class="ti ti-photo" aria-hidden="true"></i> Foto</button>
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-samen','video')"><i class="ti ti-video" aria-hidden="true"></i> MP4</button>
+              <button class="upload-btn" onclick="event.stopPropagation();showYT('ms-samen')"><i class="ti ti-brand-youtube" aria-hidden="true"></i> YouTube / Vimeo</button>
+            </div>
+            <div class="yt-row" id="yt-ms-samen" style="display:none">
+              <input type="text" placeholder="Plak YouTube of Vimeo URL" id="yt-inp-ms-samen" onclick="event.stopPropagation()">
+              <button onclick="event.stopPropagation();embedYT('ms-samen')">Laden</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node-card coral" id="n-zelf" onclick="toggle('n-zelf')">
+        <div class="node-header">
+          <i class="ti ti-user-check node-icon" aria-hidden="true"></i>
+          <div class="node-text">
+            <div class="node-name">Zelfstandigheid & discipline</div>
+            <div class="node-desc">Eigenaarschap & onafhankelijkheid</div>
+          </div>
+          <span class="badge coral">Kwaliteit</span>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="node-body" id="b-n-zelf">
+          <div class="node-content">
+            <p class="content-text">Ik kan ook erg goed zelfstandig werken. Hoewel samenwerken fijn en handig kan zijn, waardeer ik het ook om zelfstandig aan iets te werken. Ik heb andere mensen niet nodig om een project tot een goed einde te brengen en ben niet afhankelijk van anderen om resultaten te leveren.</p>
+            <div class="media-slot" id="ms-zelf">
+              <div class="media-placeholder"><i class="ti ti-photo" aria-hidden="true"></i><span>Voeg een voorbeeld of foto toe</span></div>
+            </div>
+            <div class="upload-row">
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-zelf','image')"><i class="ti ti-photo" aria-hidden="true"></i> Foto</button>
+              <button class="upload-btn" onclick="event.stopPropagation();triggerUpload('ms-zelf','video')"><i class="ti ti-video" aria-hidden="true"></i> MP4</button>
+              <button class="upload-btn" onclick="event.stopPropagation();showYT('ms-zelf')"><i class="ti ti-brand-youtube" aria-hidden="true"></i> YouTube / Vimeo</button>
+            </div>
+            <div class="yt-row" id="yt-ms-zelf" style="display:none">
+              <input type="text" placeholder="Plak YouTube of Vimeo URL" id="yt-inp-ms-zelf" onclick="event.stopPropagation()">
+              <button onclick="event.stopPropagation();embedYT('ms-zelf')">Laden</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="node-card locked">
+        <div class="node-header">
+          <i class="ti ti-code node-icon" aria-hidden="true"></i>
+          <div class="node-text">
+            <div class="node-name">Technische skills</div>
+            <div class="node-desc">Leerdoel — nog bezig</div>
+          </div>
+          <span class="badge gray">Bezig</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<input type="file" id="file-input-image" accept="image/*" style="display:none">
+<input type="file" id="file-input-video" accept="video/mp4,video/*" style="display:none">
+
+<script>
+  function toggle(id) {
+    var card = document.getElementById(id);
+    var body = document.getElementById('b-' + id);
+    if (!body) return;
+    var isOpen = card.classList.contains('open');
+    card.classList.toggle('open', !isOpen);
+    body.classList.toggle('open', !isOpen);
+  }
+
+  var currentSlot = null;
+
+  function triggerUpload(slotId, type) {
+    currentSlot = slotId;
+    if (type === 'video') {
+      document.getElementById('file-input-video').click();
+    } else {
+      document.getElementById('file-input-image').click();
+    }
+  }
+
+  document.getElementById('file-input-image').addEventListener('change', function () {
+    var file = this.files[0];
+    if (!file || !currentSlot) return;
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      document.getElementById(currentSlot).innerHTML = '<img src="' + e.target.result + '" alt="Geüploade afbeelding">';
+    };
+    reader.readAsDataURL(file);
+    this.value = '';
+  });
+
+  document.getElementById('file-input-video').addEventListener('change', function () {
+    var file = this.files[0];
+    if (!file || !currentSlot) return;
+    var url = URL.createObjectURL(file);
+    document.getElementById(currentSlot).innerHTML =
+      '<video src="' + url + '" controls playsinline></video>';
+    this.value = '';
+  });
+
+  function showYT(slotId) {
+    var row = document.getElementById('yt-' + slotId);
+    row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+  }
+
+  function getEmbedUrl(url) {
+    var yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (yt) return 'https://www.youtube.com/embed/' + yt[1] + '?rel=0&modestbranding=1';
+    var vi = url.match(/vimeo\.com\/(\d+)/);
+    if (vi) return 'https://player.vimeo.com/video/' + vi[1];
+    return null;
+  }
+
+  function embedYT(slotId) {
+    var inp = document.getElementById('yt-inp-' + slotId);
+    var url = inp.value.trim();
+    var embedUrl = getEmbedUrl(url);
+    if (!embedUrl) { inp.style.borderColor = '#D85A30'; return; }
+    document.getElementById(slotId).innerHTML =
+      '<iframe src="' + embedUrl + '" allowfullscreen title="Video"></iframe>';
+    document.getElementById('yt-' + slotId).style.display = 'none';
+  }
+
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      document.getElementById('xpfill').style.width = '75%';
+    }, 300);
+  });
+</script>
+</body>
+</html>
